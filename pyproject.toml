@@ -8,8 +8,9 @@ authors = [
     { name = "Ahmed Hamdy", email = "a29870365@gmail.com" }
 ]
 dependencies = [
-    "flet>=0.86.0",
-    "android-notify"
+    "flet>=0.85.2",
+    "flet-android-notifications",
+    "flet-permission-handler"
 ]
 
 [dependency-groups]
