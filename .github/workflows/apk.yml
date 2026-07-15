@@ -1,0 +1,64 @@
+name: Build .Apk for Android
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  BUILD_NUMBER: 1
+  BUILD_VERSION: 1.0.0
+  PYTHON_VERSION: 3.13
+  FLUTTER_VERSION: 3.41.5
+  CI: true   # مهم جدًا يمنع أي prompt
+
+jobs:
+  # ================= ANDROID APK =================
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install deps
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        cache: true
+
+    - name: Prepare Flutter
+      run: |
+        flutter config --no-analytics
+        flutter doctor
+        flutter precache
+
+    - name: Accept Android licenses
+      run: yes | flutter doctor --android-licenses
+
+    - name: Build APK
+      run: |
+        flet build apk --yes --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: apk-build
+        path: build/apk
